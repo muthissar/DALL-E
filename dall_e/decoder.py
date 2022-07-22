@@ -61,18 +61,18 @@ class Decoder(nn.Module):
 				requires_grad=self.requires_grad)
 
 		self.blocks = nn.Sequential(OrderedDict([
-			('input', make_conv(self.vocab_size, self.n_init, 1, use_float16=False)),
+			('input', make_conv(2 * 128, self.n_init, 1, use_float16=False)),
 			('group_1', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(self.n_init if i == 0 else 8 * self.n_hid, 8 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+				('upsample', nn.Upsample(scale_factor=4, mode='nearest')),
 			]))),
 			('group_2', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(8 * self.n_hid if i == 0 else 4 * self.n_hid, 4 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+				('upsample', nn.Upsample(scale_factor=8, mode='nearest')),
 			]))),
 			('group_3', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else 2 * self.n_hid, 2 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+				('upsample', nn.Upsample(scale_factor=8, mode='nearest')),
 			]))),
 			('group_4', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 1 * self.n_hid, 1 * self.n_hid)) for i in blk_range],
@@ -86,7 +86,7 @@ class Decoder(nn.Module):
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 		if len(x.shape) != 4:
 			raise ValueError(f'input shape {x.shape} is not 4d')
-		if x.shape[1] != self.vocab_size:
+		if x.shape[1] != 2 * 128:
 			raise ValueError(f'input has {x.shape[1]} channels but model built for {self.vocab_size}')
 		if x.dtype != torch.float32:
 			raise ValueError('input must have dtype torch.float32')

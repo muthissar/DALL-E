@@ -14,6 +14,7 @@ class Conv2d(nn.Module):
 	kw:    int = attr.ib(validator=lambda i, a, x: x >= 1 and x % 2 == 1)
 
 	use_float16:   bool         = attr.ib(default=True)
+	use_padding:   bool         = attr.ib(default=True)
 	device:        torch.device = attr.ib(default=torch.device('cpu'))
 	requires_grad: bool         = attr.ib(default=False)
 
@@ -40,7 +41,7 @@ class Conv2d(nn.Module):
 
 			w, b = self.w, self.b
 
-		return F.conv2d(x, w, b, padding=(self.kw - 1) // 2)
+		return F.conv2d(x, w, b, padding=(self.kw - 1) // 2 if self.use_padding else 0)
 
 def map_pixels(x: torch.Tensor) -> torch.Tensor:
 	if len(x.shape) != 4:
@@ -57,3 +58,6 @@ def unmap_pixels(x: torch.Tensor) -> torch.Tensor:
 		raise ValueError('expected input to have type float')
 
 	return torch.clamp((x - logit_laplace_eps) / (1 - 2 * logit_laplace_eps), 0, 1)
+
+def logit_laplace_distribution(x, mu, b):
+	return torch.exp(-torch.abs(torch.logit(x) - mu)/b) / (2*b*x*(1-x))

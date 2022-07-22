@@ -75,10 +75,18 @@ class Encoder(nn.Module):
 			]))),
 			('group_4', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else 8 * self.n_hid, 8 * self.n_hid)) for i in blk_range],
+				#*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else self.n_hid, self.n_hid)) for i in blk_range],
 			]))),
 			('output', nn.Sequential(OrderedDict([
 				('relu', nn.ReLU()),
-				('conv', make_conv(8 * self.n_hid, self.vocab_size, 1, use_float16=False)),
+				#('conv', make_conv(8 * self.n_hid, self.vocab_size, 1, use_float16=False)),
+				# TODO: changed mcmutti. This however should instead of producing 32,32 produce 1
+				('conv', make_conv(8 * self.n_hid, 2 * 128, 32, use_float16=False, use_padding=False)),
+			# ('output', nn.Sequential(OrderedDict([
+			# 	('relu', nn.ReLU()),
+			# 	#('conv', make_conv(8 * self.n_hid, self.vocab_size, 1, use_float16=False)),
+			# 	# TODO: changed mcmutti. This however should instead of producing 32,32 produce 1
+			# 	('conv', make_conv(8 * self.n_hid, 2 * 512, 8 * self.n_hid, use_float16=False)),
 			]))),
 		]))
 
