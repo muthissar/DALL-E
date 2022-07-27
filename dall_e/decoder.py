@@ -23,7 +23,7 @@ class DecoderBlock(nn.Module):
 		self.n_hid = self.n_out // 4
 		self.post_gain = 1 / (self.n_layers ** 2)
 
-		make_conv     = partial(Conv2d, device=self.device, requires_grad=self.requires_grad)
+		make_conv     = partial(Conv2d, device=self.device, requires_grad=self.requires_grad, )
 		self.id_path  = make_conv(self.n_in, self.n_out, 1) if self.n_in != self.n_out else nn.Identity()
 		self.res_path = nn.Sequential(OrderedDict([
 				('relu_1', nn.ReLU()),
