@@ -40,7 +40,7 @@ class EncoderBlock(nn.Module):
 
 @attr.s(eq=False, repr=False)
 class Encoder(nn.Module):
-	group_count:     int = 4
+	group_count:     int = 7
 	n_hid:           int = attr.ib(default=256,  validator=lambda i, a, x: x >= 64)
 	n_blk_per_group: int = attr.ib(default=2,    validator=lambda i, a, x: x >= 1)
 	input_channels:  int = attr.ib(default=3,    validator=lambda i, a, x: x >= 1)
@@ -74,14 +74,30 @@ class Encoder(nn.Module):
 				('pool', nn.MaxPool2d(kernel_size=2)),
 			]))),
 			('group_4', nn.Sequential(OrderedDict([
-				*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else 8 * self.n_hid, 8 * self.n_hid)) for i in blk_range],
+				*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else 6 * self.n_hid, 6 * self.n_hid)) for i in blk_range],
+				('pool', nn.MaxPool2d(kernel_size=2)),
+				#*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else self.n_hid, self.n_hid)) for i in blk_range],
+			]))),
+			('group_5', nn.Sequential(OrderedDict([
+				*[(f'block_{i + 1}', make_blk(6 * self.n_hid if i == 0 else 8 * self.n_hid, 8 * self.n_hid)) for i in blk_range],
+				('pool', nn.MaxPool2d(kernel_size=2)),
+				#*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else self.n_hid, self.n_hid)) for i in blk_range],
+			]))),
+			('group_6', nn.Sequential(OrderedDict([
+				*[(f'block_{i + 1}', make_blk(8 * self.n_hid if i == 0 else 10 * self.n_hid, 10 * self.n_hid)) for i in blk_range],
+				('pool', nn.MaxPool2d(kernel_size=(2, 1))),
+				#*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else self.n_hid, self.n_hid)) for i in blk_range],
+			]))),
+			('group_7', nn.Sequential(OrderedDict([
+				*[(f'block_{i + 1}', make_blk(10 * self.n_hid if i == 0 else 12 * self.n_hid, 12 * self.n_hid)) for i in blk_range],
+				('pool', nn.MaxPool2d(kernel_size=(2, 1))),
 				#*[(f'block_{i + 1}', make_blk(4 * self.n_hid if i == 0 else self.n_hid, self.n_hid)) for i in blk_range],
 			]))),
 			('output', nn.Sequential(OrderedDict([
 				('relu', nn.ReLU()),
 				#('conv', make_conv(8 * self.n_hid, self.vocab_size, 1, use_float16=False)),
 				# TODO: changed mcmutti. This however should instead of producing 32,32 produce 1
-				('conv', make_conv(8 * self.n_hid, 2 * 128, 32, use_float16=False, use_padding=False)),
+				('conv', make_conv(12 * self.n_hid, 2* self.vocab_size, 1, use_float16=False, use_padding=False)),
 			# ('output', nn.Sequential(OrderedDict([
 			# 	('relu', nn.ReLU()),
 			# 	#('conv', make_conv(8 * self.n_hid, self.vocab_size, 1, use_float16=False)),

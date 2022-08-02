@@ -42,7 +42,7 @@ class DecoderBlock(nn.Module):
 @attr.s(eq=False, repr=False)
 class Decoder(nn.Module):
 	group_count:     int = 4
-	n_init:          int = attr.ib(default=128,  validator=lambda i, a, x: x >= 8)
+	n_init:          int = attr.ib(default=8192,  validator=lambda i, a, x: x >= 8)
 	n_hid:           int = attr.ib(default=256,  validator=lambda i, a, x: x >= 64)
 	n_blk_per_group: int = attr.ib(default=2,    validator=lambda i, a, x: x >= 1)
 	output_channels: int = attr.ib(default=3,    validator=lambda i, a, x: x >= 1)
@@ -85,16 +85,16 @@ class Decoder(nn.Module):
 			]))),
 			('group_6', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 2 * self.n_hid, 2 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+				('upsample', nn.Upsample(scale_factor=(2,1), mode='nearest')),
 			]))),
 			('group_7', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 2 * self.n_hid, 2 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+				('upsample', nn.Upsample(scale_factor=(2,1), mode='nearest')),
 			]))),
-			('group_8', nn.Sequential(OrderedDict([
-				*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 2 * self.n_hid, 2 * self.n_hid)) for i in blk_range],
-				('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
-			]))),
+			# ('group_8', nn.Sequential(OrderedDict([
+			# 	*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 2 * self.n_hid, 2 * self.n_hid)) for i in blk_range],
+			# 	('upsample', nn.Upsample(scale_factor=2, mode='nearest')),
+			# ]))),
 
 			('group_*', nn.Sequential(OrderedDict([
 				*[(f'block_{i + 1}', make_blk(2 * self.n_hid if i == 0 else 1 * self.n_hid, 1 * self.n_hid)) for i in blk_range],
