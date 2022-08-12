@@ -41,7 +41,7 @@ class DecoderBlock(nn.Module):
 
 @attr.s(eq=False, repr=False)
 class Decoder(nn.Module):
-	group_count:     int = 4
+	group_count:     int = 7
 	n_init:          int = attr.ib(default=8192,  validator=lambda i, a, x: x >= 8)
 	n_hid:           int = attr.ib(default=256,  validator=lambda i, a, x: x >= 64)
 	n_blk_per_group: int = attr.ib(default=2,    validator=lambda i, a, x: x >= 1)
