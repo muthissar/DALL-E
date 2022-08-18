@@ -8,6 +8,8 @@ import torch.nn.functional as F
 from collections  import OrderedDict
 from functools    import partial
 from dall_e.utils import Conv2d
+from mututils.functional import compose2
+from mututils.torch.block_gradient_scale import GradientScaledModule
 
 @attr.s(eq=False, repr=False)
 class DecoderBlock(nn.Module):
@@ -58,7 +60,9 @@ class Decoder(nn.Module):
 		blk_range  = range(self.n_blk_per_group)
 		n_layers   = self.group_count * self.n_blk_per_group
 		make_conv  = partial(Conv2d, device=self.device, requires_grad=self.requires_grad)
-		make_blk   = partial(DecoderBlock, n_layers=n_layers, device=self.device,
+		# make_blk   = partial(DecoderBlock, n_layers=n_layers, device=self.device,
+		# 		requires_grad=self.requires_grad)
+		make_blk   = partial(compose2(GradientScaledModule, DecoderBlock), n_layers=n_layers, device=self.device,
 				requires_grad=self.requires_grad)
 
 		self.blocks = nn.Sequential(OrderedDict([
